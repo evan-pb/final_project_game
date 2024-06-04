@@ -15,9 +15,9 @@ frame_count = 0
 seconds = 00
 minutes = 00
 
-font = pygame.font.Font("ARCADECLASSIC.TTF", 45)
+font = pygame.font.Font("ARCADECLASSIC.TTF", 30)
 
-start_text = font.render("press  any  key  to  start", True, WHITE)
+start_text = font.render("press any key to start", True, WHITE)
 start_rect = start_text.get_rect()
 start_rect.centerx, start_rect.centery = WIDTH // 2, LENGTH // 2
 
@@ -61,11 +61,11 @@ class Ball:
     def update(self):
         if self.rect.colliderect(left_paddle.rect) or self.rect.colliderect(right_paddle.rect):
             self.dx = -self.dx
-        if self.rect.top == 0 or self.rect.bottom == LENGTH:
+        if self.rect.top <= 0 or self.rect.bottom >= LENGTH:
             self.dy = -self.dy
-        if self.rect.left == 0:
+        if self.rect.left <= 0:
             self.left_lost = True
-        if self.rect.right == WIDTH:
+        if self.rect.right >= WIDTH:
             self.right_lost = True
         self.rect.x += self.dx
         self.rect.y += self.dy
@@ -74,8 +74,10 @@ class Ball:
         pygame.draw.rect(screen, WHITE, self.rect)
 
     def reset(self):
+        global SPEED
         self.rect.x, self.rect.y = WIDTH // 2, LENGTH // 2
         self.dx, self.dy = r.choice((SPEED, -SPEED)), r.choice((SPEED / 2, -SPEED / 2))
+        SPEED = 10
 
 
 class Paddle:
@@ -139,12 +141,14 @@ while running:
         left_lives -= 1
         heart_left.update()
         ball.left_lost = False
+        # pygame.time.delay(500)
 
     if ball.right_lost:
         ball.reset()
         right_lives -= 1
         heart_right.update()
         ball.right_lost = False
+        # pygame.time.delay(500)
 
     if not playing:
         screen.fill(BLACK)
@@ -176,14 +180,14 @@ while running:
         seconds += 1
         # if seconds == 30:
         #     SPEED += 2
-        if seconds == 60:
-            # SPEED += 2
+        if seconds % 20 == 0:
+            SPEED += 2
             minutes += 1
             seconds = 0
         if len(str(seconds)) == 1 and len(str(minutes)) == 1:
             time_text = font.render(f"0{minutes}  0{seconds}", True, LIGHTGRAY)
         elif len(str(seconds)) == 1 and len(str(minutes)) == 2:
-            time_text = font.render(f"{minutes}  0{minutes}", True, LIGHTGRAY)
+            time_text = font.render(f"{minutes}  0{seconds}", True, LIGHTGRAY)
         elif len(str(seconds)) == 2 and len(str(minutes)) == 1:
             time_text = font.render(f"0{minutes}  {seconds}", True, LIGHTGRAY)
         else:
