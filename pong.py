@@ -15,7 +15,7 @@ frame_count = 0
 seconds = 00
 minutes = 00
 
-font = pygame.font.Font("ARCADECLASSIC.TTF", 30)
+font = pygame.font.Font("assets/ARCADECLASSIC.TTF", 30)
 
 start_text = font.render("press any key to start", True, WHITE)
 start_rect = start_text.get_rect()
@@ -31,14 +31,14 @@ again_text_rrect.centerx, again_text_rrect.centery = WIDTH // 2, (LENGTH // 2) -
 
 time_text = font.render("00  00", True, LIGHTGRAY)
 time_rect = time_text.get_rect()
-time_rect.centerx, time_rect.top = (WIDTH//2, 0)
+time_rect.centerx, time_rect.top = (WIDTH // 2, 0)
 
 playing = False
 
 
 class Hearts(pygame.sprite.Sprite):
     def __init__(self) -> None:
-        self.image = pygame.image.load("heart.png")
+        self.image = pygame.image.load("assets/heart.png")
         self.rect = self.image.get_rect()
 
     def update(self):
@@ -59,7 +59,9 @@ class Ball:
         self.left_lost, self.right_lost = False, False
 
     def update(self):
-        if self.rect.colliderect(left_paddle.rect) or self.rect.colliderect(right_paddle.rect):
+        if self.rect.colliderect(left_paddle.rect) or self.rect.colliderect(
+            right_paddle.rect
+        ):
             self.dx = -self.dx
         if self.rect.top <= 0 or self.rect.bottom >= LENGTH:
             self.dy = -self.dy
@@ -141,14 +143,12 @@ while running:
         left_lives -= 1
         heart_left.update()
         ball.left_lost = False
-        # pygame.time.delay(500)
 
     if ball.right_lost:
         ball.reset()
         right_lives -= 1
         heart_right.update()
         ball.right_lost = False
-        # pygame.time.delay(500)
 
     if not playing:
         screen.fill(BLACK)
@@ -178,27 +178,15 @@ while running:
     frame_count += 1
     if frame_count == 60:
         seconds += 1
-        # if seconds == 30:
-        #     SPEED += 2
         if seconds % 20 == 0:
             SPEED += 2
             minutes += 1
             seconds = 0
-        if len(str(seconds)) == 1 and len(str(minutes)) == 1:
-            time_text = font.render(f"0{minutes}  0{seconds}", True, LIGHTGRAY)
-        elif len(str(seconds)) == 1 and len(str(minutes)) == 2:
-            time_text = font.render(f"{minutes}  0{seconds}", True, LIGHTGRAY)
-        elif len(str(seconds)) == 2 and len(str(minutes)) == 1:
-            time_text = font.render(f"0{minutes}  {seconds}", True, LIGHTGRAY)
-        else:
-            time_text = font.render(f"{minutes}  {seconds}", True, LIGHTGRAY)
+        time_text = font.render(f"{minutes:02d}:{seconds:02d}", True, LIGHTGRAY)
         frame_count = 0
-
 
     pygame.display.flip()
     clock.tick(60)
-    
-
 
 
 pygame.quit()

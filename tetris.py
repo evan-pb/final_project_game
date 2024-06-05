@@ -20,18 +20,26 @@ TOGGLE_SHADOW = True
 
 reds = [RED, "#85150d", "#c7271c", "#520803", "#9e0f05", "#a31f15", "#f02416", "#d41002"]
 
-
-font = pg.font.Font("ARCADECLASSIC.ttf", 25)
-smallfont = pg.font.Font("ARCADECLASSIC.ttf", 15)
+font = pg.font.Font("assets/ARCADECLASSIC.ttf", 25)
+smallfont = pg.font.Font("assets/ARCADECLASSIC.ttf", 15)
 types = ["square", "stair_l", "stair_r", "L_l", "L_r", "line", "t"]
 c_types = ["square", "stair_l", "stair_r", "L_l", "L_r", "line", "t", "star", "corner", "crescent", "step", "dot", "long_line"]
 
+theme = pg.mixer.music.load("assets/theme.mp3")
+blip = pg.mixer.Sound("assets/hitHurt.wav")
+clear_sound = pg.mixer.Sound("assets/clear.mp3")
+game_over_sound = pg.mixer.Sound("assets/game_over.mp3")
+clear_sound.set_volume(30)
 
 # Initialize constant objects
 
-logo_image = pg.transform.scale_by(pg.image.load("logo.png"), 1.5)
+logo_image = pg.transform.scale_by(pg.image.load("assets/logo.png"), 1.5)
 logo_rect = logo_image.get_rect()
 logo_rect.center = (WIDTH // 2, 200)
+
+start_text = font.render("PRESS ENTER TO START!", True, LIGHTGRAY)
+start_rect = start_text.get_rect()
+start_rect.center = (WIDTH // 2, 400)
 
 pause_frame_rect = pg.rect.Rect(WIDTH//2 - 250, HEIGHT//2 - 100, 500, 200)
 pause_fill_rect = pg.rect.Rect(WIDTH//2 - 245, HEIGHT//2 - 95, 490, 190)
@@ -47,7 +55,6 @@ game_over_rect.center = (WIDTH//2, HEIGHT//2 - 30)
 high_score_message = font.render("NEW HIGH SCORE!", True, WHITE)
 high_score_message_rect = high_score_message.get_rect()
 high_score_message_rect.center = (WIDTH // 2, game_over_rect.y)
-
 
 restart_text = font.render("RESTART", True, WHITE)
 restart_text_rect = restart_text.get_rect()
@@ -115,7 +122,6 @@ high_score_num_c = font.render("error", True, RED)
 high_score_num_c_rect = high_score_num_c.get_rect()
 high_score_num_c_rect.x, high_score_num_c_rect.y = high_score_rect.x, 120
 
-
 # Settings components
 
 settings_text = font.render("SETTINGS", True, WHITE)
@@ -126,11 +132,8 @@ settings_button = pg.rect.Rect(settings_rect.x - 10, settings_rect.y - 10, setti
 settings_box = pg.rect.Rect(settings_button.x, 100, settings_button.width, 500)
 settings_box_fill = pg.rect.Rect(settings_box.x + 5, settings_box.y + 5, settings_box.width - 10, settings_box.height - 10)
 
-
-
 frame_rect = pg.rect.Rect(WIDTH // 2 - 155, 0, 310, 610)
 fill_rect = pg.rect.Rect(WIDTH // 2 - 150, 5, 300, 600)
-
 
 toggle_shadow_text = smallfont.render("Drop shadow", True, WHITE)
 toggle_shadow_rect = toggle_shadow_text.get_rect()
@@ -305,7 +308,6 @@ class Game:
         if 2 in self.matrix:
             for i in range(len(fill_values_2[0])):
                 rect2 = pg.rect.Rect((WIDTH//2-150) + 30 * fill_values_2[1][i], 5 + (30 * fill_values_2[0][i]), 30, 30)
-                # print(self.color_map[fill_values_2[0][i], fill_values_2[1][i]] + "H")
                 pg.draw.rect(screen, self.color_map[fill_values_2[0][i], fill_values_2[1][i]], rect2)
         if 3 in self.matrix:
             for i in range(len(fill_values_3[0])):
@@ -321,13 +323,15 @@ class Game:
             for i in range(len(locations[0])):
                 self.matrix[locations[0][i], locations[1][i]] = 2
                 self.color_map[locations[0][i], locations[1][i]] = color 
-            self.score += 10         
+            self.score += 10   
+            blip.play()      
 
         elif 2 in self.matrix[[locations[0][i] + 1 for i in range(len(locations[0]))], locations[1]]: # Check if there is a block under any of the four squares
             for i in range(len(locations[0])):
                 self.matrix[locations[0][i], locations[1][i]] = 2  
                 self.color_map[locations[0][i], locations[1][i]] = color      
-            self.score += 10    
+            self.score += 10   
+            blip.play() 
         else:
             new_locations = [[i + 1 for i in locations[0]], locations[1]]  # define locations for the block after it has lowered by 1 square
             # Clear old values from matrix
@@ -383,11 +387,11 @@ class Game:
             self.color_map = np.delete(self.color_map, clear_rows, axis = 0)
             self.color_map = np.vstack([np.full((len(clear_rows), 10), "       "), self.color_map])
             self.lines += len(clear_rows)
-            # for i in range(len(clear_rows)):
             if len(clear_rows) == 4:
                 self.score += 500
             else:
                 self.score += 50 * len(clear_rows) 
+            clear_sound.play()
             if TOGGLE_SHADOW:
                 self.clear_shadow()
                 self.highlight_drop()
@@ -421,9 +425,6 @@ class Game:
                 if not self.matrix[shadow_location[0][i], shadow_location[1][i]]:
                     self.matrix[shadow_location[0][i], shadow_location[1][i]] = 3        
 
-
-    def level_up(self):
-        self.level = self.lines // 10 + 1
 
 
 class Block:
@@ -491,14 +492,15 @@ if __name__ == "__main__":
     PLAYING = False
     PAUSED = False
     GAME_OVER = False
-    SHOW_SETTINGS = False
-    
+    SHOW_SETTINGS = False 
     SHOW_NEXT_BLOCK = True
     CHALLENGE = False
     NEXT_MATRIX = np.zeros((4,4))
     high_scores = get_high_score()
     new_high_score = False
     frame_count = 0
+    dummy = 0
+    pg.mixer.music.play(-1)
     while RUNNING:
         for e in pg.event.get():
             if e.type == pg.QUIT:
@@ -511,6 +513,9 @@ if __name__ == "__main__":
                     SHOW_SETTINGS = False
                     next_block = Block(np.random.choice(types))
                     block = Block(np.random.choice(types))
+                if e.key == pg.K_ESCAPE:
+                    pg.mixer.music.stop()
+                    exec(open("main.py").read())
             if e.type == pg.KEYDOWN and PLAYING and not GAME_OVER:
                 if e.key == pg.K_ESCAPE:
                     PAUSED = not PAUSED
@@ -545,6 +550,7 @@ if __name__ == "__main__":
                     PAUSED = False
                     GAME_OVER = False
                     frame_count = 0
+                pg.mixer.music.unpause()
             if e.type == pg.MOUSEBUTTONDOWN and not PLAYING:
                 if (
                     settings_button.left < mouse[0] < settings_button.right
@@ -577,8 +583,10 @@ if __name__ == "__main__":
         mouse = pg.mouse.get_pos()
         
         if not PLAYING: # Title screen objects
+            dummy = 0
             screen.fill(BLACK)
             screen.blit(logo_image, logo_rect)
+            screen.blit(start_text, start_rect)
             if (
                 settings_button.left < mouse[0] < settings_button.right
                 and settings_button.top < mouse[1] < settings_button.bottom
@@ -601,7 +609,6 @@ if __name__ == "__main__":
             pg.draw.rect(screen, WHITE, pause_frame_rect)
             pg.draw.rect(screen, BLACK, pause_fill_rect)
             screen.blit(pause_text, pause_text_rect) if PAUSED else None
-            # screen.blit(game_over_text, game_over_rect) if GAME_OVER else None
             if (
                 restart_button_rect.left < mouse[0] < restart_button_rect.right
                 and restart_button_rect.top < mouse[1] < restart_button_rect.bottom
@@ -625,9 +632,14 @@ if __name__ == "__main__":
                     screen.blit(high_score_message, high_score_message_rect)
                 else:
                     screen.blit(game_over_text, game_over_rect)
+                pg.mixer.music.pause()
+                game_over_sound.play() if dummy == 0 else None
+                dummy += 1
+
 
         else:
             frame_count += 1
+            dummy = 0
 
             if 1 not in game.matrix:  # If there are no moving blocks
                 block = next_block
@@ -657,8 +669,6 @@ if __name__ == "__main__":
             game.mat_to_image(color=block.color)
 
             draw_overlay()
-            # with open("high_score.txt", "w") as f:
-            #     f.writelines(high_scores)
             
         pg.display.flip()
         clock.tick(60)
@@ -666,5 +676,3 @@ if __name__ == "__main__":
 
     pg.quit()
 
-
-    # TODO Add high score fuctionality, music, title screen, and sound effects when block hits the ground

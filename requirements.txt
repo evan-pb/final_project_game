@@ -1,2 +1,2 @@
-numpy==1.26.2
+numpy==1.26.2git 
 pygame==2.5.2

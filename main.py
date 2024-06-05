@@ -7,7 +7,7 @@ WIDTH, LENGTH = 1000, 600
 screen = pygame.display.set_mode((WIDTH, LENGTH))
 clock = pygame.time.Clock()
 
-smallfont = pygame.font.Font("ARCADECLASSIC.TTF", 45)
+smallfont = pygame.font.Font("assets/ARCADECLASSIC.TTF", 45)
 
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
@@ -24,7 +24,10 @@ tetris_button = smallfont.render("TETRIS", True, WHITE)
 tetris_rect = tetris_button.get_rect()
 tetris_rect.center = WIDTH // 2 + 200, LENGTH // 2
 tetris_button_rect = pygame.rect.Rect(
-    tetris_rect.x - 20, tetris_rect.y - 10, tetris_rect.width + 40, tetris_rect.height + 20
+    tetris_rect.x - 20,
+    tetris_rect.y - 10,
+    tetris_rect.width + 40,
+    tetris_rect.height + 20,
 )
 
 running = True
@@ -34,6 +37,9 @@ while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_ESCAPE:
+                running = False
         if event.type == pygame.MOUSEBUTTONDOWN:
             if (
                 pong_button_rect.left < mouse[0] < pong_button_rect.right
