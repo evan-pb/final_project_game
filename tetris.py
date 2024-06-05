@@ -110,7 +110,7 @@ score_count_text = font.render("00000", True, LIGHTGRAY)
 score_count_rect = score_count_text.get_rect()
 score_count_rect.center = score_fill.centerx, score_fill.centery
 
-high_score_text = font.render("HIGH SCORE", True, WHITE)
+high_score_text = font.render("HIGH SCORES", True, WHITE)
 high_score_rect = high_score_text.get_rect()
 high_score_rect.center = (150, 40)
 
@@ -622,11 +622,11 @@ if __name__ == "__main__":
             screen.blit(restart_text, restart_text_rect)
             screen.blit(continue_text, continue_text_rect)
             p = 1 if CHALLENGE else 0
-            if game.score > int(high_scores[p]):
-                high_scores[p] = game.score
-                update_high_score(p, game.score)
-                new_high_score = True
             if GAME_OVER:
+                if game.score > int(high_scores[p]):
+                    high_scores[p] = game.score
+                    update_high_score(p, game.score)
+                    new_high_score = True
                 # Show score, high score if previous one was beat, and amount of lines cleared here
                 if new_high_score:                    
                     screen.blit(high_score_message, high_score_message_rect)

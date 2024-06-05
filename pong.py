@@ -14,6 +14,7 @@ SPEED = 10
 frame_count = 0
 seconds = 00
 minutes = 00
+blip = pygame.mixer.Sound("assets/hitHurt.wav")
 
 font = pygame.font.Font("assets/ARCADECLASSIC.TTF", 30)
 
@@ -63,6 +64,7 @@ class Ball:
             right_paddle.rect
         ):
             self.dx = -self.dx
+            blip.play()
         if self.rect.top <= 0 or self.rect.bottom >= LENGTH:
             self.dy = -self.dy
         if self.rect.left <= 0:
